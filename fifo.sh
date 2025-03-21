@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 
 source ~/p/bash-debugger
 fifo_name="/tmp/cat_fifo"
