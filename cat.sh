@@ -13,4 +13,14 @@ main() {
   done
 }
 
+add_line_to_fifo() {
+  if [[ "$1" ]]; then
+    echo "$1" >fifo
+  else
+    read line
+    echo "$line" >fifo
+  fi
+}
+
 alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
+alias altf='add_line_to_fifo'
