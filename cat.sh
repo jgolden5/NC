@@ -36,9 +36,18 @@ store() {
 }
 
 view_storage() {
-  echo -e "$storage"
+  if [[ "$storage" ]]; then
+    echo -e "$storage"
+  else
+    echo "--storage is empty--"
+  fi
+}
+
+clear_storage() {
+  storage=
 }
 
 alias altf='add_line_to_fifo'
 alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
+alias cs='clear_storage'
 alias vs='view_storage'
