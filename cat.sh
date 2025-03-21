@@ -2,6 +2,7 @@
 
 source ~/p/bash-debugger
 fifo_name="fifo"
+storage=""
 
 main() {
   n=1
@@ -26,5 +27,18 @@ add_line_to_fifo() {
   get_input_from_stdin_or_read "$@" >fifo
 }
 
-alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
+store() {
+  if [[ "$storage" ]]; then
+    storage+=$'\n'"$(get_input_from_stdin_or_read "$@" | tee fifo)"
+  else
+    storage+="$(get_input_from_stdin_or_read "$@" | tee fifo)"
+  fi
+}
+
+view_storage() {
+  echo -e "$storage"
+}
+
 alias altf='add_line_to_fifo'
+alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
+alias vs='view_storage'
