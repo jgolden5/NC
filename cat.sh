@@ -13,9 +13,4 @@ main() {
   done
 }
 
-close_fifo() {
-  echo "closing fifo" >"$fifo_name"
-  rm "$fifo_name"
-}
-
 alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
