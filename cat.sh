@@ -1,7 +1,7 @@
 #!/usr/local/bin/bash
 
 source ~/p/bash-debugger
-fifo_name="fifo"
+fifo_name="/tmp/cat_fifo"
 storage=""
 
 main() {
