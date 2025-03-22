@@ -44,7 +44,7 @@ view_storage() {
 }
 
 clear_storage() {
-  storage=
+  unset storage && echo "storage was successfully cleared"
 }
 
 alias altf='add_line_to_fifo'
