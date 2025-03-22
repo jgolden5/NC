@@ -48,6 +48,6 @@ clear_storage() {
 }
 
 alias altf='add_line_to_fifo'
-alias scat='source cat.sh && echo "cat.sh was sourced successfully"'
+alias sf='source fifo.sh && echo "fifo.sh was sourced successfully"'
 alias cs='clear_storage'
 alias vs='view_storage'
