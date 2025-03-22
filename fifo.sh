@@ -23,6 +23,17 @@ get_line() {
   fi
 }
 
+add_multiple_lines() {
+  while read line; do
+    if [[ "$line" =~ ^EOF$ ]]; then
+      break
+    else
+      echo "$line" >$fifo_name
+    fi
+    (( n++ ))
+  done
+}
+
 add_line() {
   get_line "$@" >$fifo_name
 }
