@@ -6,7 +6,7 @@ storage=""
 
 main() {
   n=1
-  mkfifo $fifo_name 2>/dev/null
+  mkfifo "$fifo_name" 2>/dev/null
   #debug
   while [[ -p "$fifo_name" ]]; do
     echo "line #${n} = \"$(cat $fifo_name)\""
