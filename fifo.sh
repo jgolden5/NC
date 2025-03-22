@@ -14,7 +14,7 @@ main() {
   done
 }
 
-get_input_from_stdin_or_read() {
+get_line() {
   if [[ "$1" ]]; then
     echo "$1"
   else
@@ -23,8 +23,8 @@ get_input_from_stdin_or_read() {
   fi
 }
 
-add_line_to_fifo() {
-  get_input_from_stdin_or_read "$@" >$fifo_name
+add_line() {
+  get_line "$@" >$fifo_name
 }
 
 store() {
@@ -47,7 +47,7 @@ clear_storage() {
   unset storage && echo "storage was successfully cleared"
 }
 
-alias altf='add_line_to_fifo'
+alias al='add_line'
 alias sf='source fifo.sh && echo "fifo.sh was sourced successfully"'
 alias cs='clear_storage'
 alias vs='view_storage'
