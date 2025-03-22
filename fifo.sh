@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source ~/p/bash-debugger
-fifo_name="/tmp/cat_fifo"
+fifo_name="/tmp/fifo"
 storage=""
 
 main() {
@@ -9,7 +9,7 @@ main() {
   mkfifo $fifo_name 2>/dev/null
   #debug
   while [[ -p "$fifo_name" ]]; do
-    echo "line #${n} = \"$(cat fifo)\""
+    echo "line #${n} = \"$(cat $fifo_name)\""
     (( n++ ))
   done
 }
@@ -24,14 +24,14 @@ get_input_from_stdin_or_read() {
 }
 
 add_line_to_fifo() {
-  get_input_from_stdin_or_read "$@" >fifo
+  get_input_from_stdin_or_read "$@" >$fifo_name
 }
 
 store() {
   if [[ "$storage" ]]; then
-    storage+=$'\n'"$(get_input_from_stdin_or_read "$@" | tee fifo)"
+    storage+=$'\n'"$(get_input_from_stdin_or_read "$@" | tee $fifo_name)"
   else
-    storage+="$(get_input_from_stdin_or_read "$@" | tee fifo)"
+    storage+="$(get_input_from_stdin_or_read "$@" | tee $fifo_name)"
   fi
 }
 
