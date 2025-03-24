@@ -14,21 +14,23 @@ main() {
 
 server() {
   local response=
-  set -x
+  #set -x
   while true; do
     if [[ ! "$response" ]]; then
       get_request || exit 1 
       if [[ "$response" ]]; then
         send_response || exit 1
       else
+        echo "Error: Response from request was not recognized"
         break
       fi
     else
-      handle_response
+      handle_response >&2
+      unset response
       break
     fi
   done
-  set +x
+  #set +x
 }
 
 get_request() {
