@@ -40,9 +40,9 @@ add_line() {
 
 store() {
   if [[ "$storage" ]]; then
-    storage+=$'\n'"$(get_input_from_stdin_or_read "$@" | tee $fifo_name)"
+    storage+=$'\n'"$(get_line "$@" | tee $fifo_name)"
   else
-    storage+="$(get_input_from_stdin_or_read "$@" | tee $fifo_name)"
+    storage+="$(get_line "$@" | tee $fifo_name)"
   fi
 }
 
