@@ -26,6 +26,7 @@ server() {
     if [[ "$line" ]]; then
       get_request "$line" || exit 1 
       process_request
+      response="$response_code $response_message"
     else
       send_response || exit 1
     fi
