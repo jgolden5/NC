@@ -3,19 +3,12 @@
 source ~/p/bash-debugger
 
 main() {
-  set_fifos
+  mkfifo response 2>/dev/null
+  exec {response_fd}<>response
   #debug
-
   nc -kl 1234 <&$response_fd | server >&$response_fd
 
   eval "exec $fd>&-"
-}
-
-set_fifos() {
-  mkfifo request 2>/dev/null
-  exec {request_fd}<>request
-  mkfifo response 2>/dev/null
-  exec {response_fd}<>response
 }
 
 server() {
@@ -25,6 +18,7 @@ server() {
     response= \
     response_code_and_reason= \
     response_body= \
+    response_count=1 \
 
   while read line; do
     process_request_fifo "$line"
@@ -42,6 +36,7 @@ process_request_fifo() {
   else
     echo -e "$response"
     line_number=1
+    (( response_count++ ))
   fi
 }
 
@@ -59,7 +54,7 @@ generate_response() {
   if [[ $method == "GET" ]]; then
     if [[ $path == "/" ]]; then
       response_code_and_reason="200 OK"
-      response_body="Netcat Succeeded"
+      response_body="Netcat Succeeded #${response_count}"
     else
       response_code_and_reason="404 Not Found"
       response_body="path didn't exist"
