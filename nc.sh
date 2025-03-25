@@ -3,10 +3,13 @@
 source ~/p/bash-debugger
 
 main() {
-  mkfifo /tmp/fifo 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
-  exec {fd}<>/tmp/fifo
-  #nc -l 1234 <&$fd | server >&$fd
-  cat <&$fd | server >&$fd
+  set -x
+  mkfifo /tmp/fifo_request 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
+  mkfifo /tmp/fifo_response 2>/dev/null
+  exec {request_fd}<>/tmp/fifo_request
+  exec {response_fd}<>/tmp/fifo_response 
+  #nc -l 1234 <&$request_fd | server >&$request_fd
+  cat <&$request_fd | server >&$response_fd
   #debug
   #echo "BLOB" | server
   eval "exec $fd>&-"
@@ -14,29 +17,28 @@ main() {
 
 server() {
   local response=
-  #set -x
   while true; do
     if [[ ! "$response" ]]; then
       get_request || exit 1 
       if [[ "$response" ]]; then
-        send_response || exit 1
+        send_response >&$response_fd || exit 1
+        cat <&$response_fd | handle_response
+        unset response
       else
         echo "Error: Response from request was not recognized"
         break
       fi
-    else
-      handle_response >&2
-      unset response
-      break
     fi
   done
-  #set +x
+  set +x
 }
 
 get_request() {
   n=1
   while read line; do
-    if [[ $n == 1 ]]; then
+    if [[ "$line" =~ "200 OK" || "$line" =~ "404 Not Found" || "$line" =~ "405 Method Not Allowed" ]]; then
+      continue
+    elif [[ $n == 1 ]]; then
       local method="$(echo "$line" | awk '{ print $1 }')"
       local path="$(echo "$line" | awk '{ print $2 }')"
       local version="$(echo "$line" | awk '{ print $3 }' | sed 's/\r//')"
@@ -66,21 +68,7 @@ send_response() {
 }
 
 handle_response() {
-  response_code="$(echo $response | awk '{ print $2 }')"
-  case $response_code in
-    200)
-      cat <&$fd
-      ;;
-    404)
-      echo "404 Not Found"
-      ;;
-    405)
-      echo "405 Method Not Allowed"
-      ;;
-    *)
-      echo "response code $response_code not recognized"
-      ;;
-  esac
+  echo "response $response is currently being handled"
 }
 
 main
