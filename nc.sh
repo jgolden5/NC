@@ -5,9 +5,7 @@ source ~/p/bash-debugger
 main() {
   mkfifo response 2>/dev/null
   exec {response_fd}<>response
-  #debug
   nc -kl 1234 <&$response_fd | server >&$response_fd
-
   eval "exec $fd>&-"
 }
 
@@ -42,7 +40,6 @@ process_request_fifo() {
 
 get_request() {
   request="$1"
-  echo "$line" >&2
 }
 
 process_request() {
