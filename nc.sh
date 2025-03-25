@@ -3,13 +3,11 @@
 source ~/p/bash-debugger
 
 main() {
-  mkfifo /tmp/fifo_request 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
-  exec {request_fd}<>/tmp/fifo_request
+  mkfifo /tmp/fifo 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
+  exec {fd}<>/tmp/fifo_request
   #debug
-  #nc -l 1234 <&$request_fd | server >&$request_fd
-  cat <&$request_fd | server
-  #echo "BLOB" | server
-  eval "exec $request_fd>&-"
+  nc -l 1234 <&$fd | server
+  eval "exec $fd>&-"
 }
 
 server() {
@@ -19,7 +17,7 @@ server() {
     if [[ ! "$response" ]]; then
       get_request || exit 1 
       if [[ "$response" ]]; then
-        handle_response || exit 1
+        send_response >&$fd || exit 1
         unset response
       else
         echo "Error: Response from request was not recognized"
@@ -57,24 +55,8 @@ get_request() {
   done
 }
 
-handle_response() {
-  response_code="$(echo "$response" | awk '{ print $2 }')"
-  case "$response_code" in
-    200)
-      echo "200 OK"
-      final_message="$(echo -e "$response" | awk 'END { print }')"
-      echo "$final_message"
-      ;;
-    404)
-      echo "404 Not Found. Path was not recognized"
-      ;;
-    405)
-      echo "405 Method Not Allowed. Method was not recognized"
-      ;;
-    *)
-      echo "Response code not recognized"
-      ;;
-  esac
+send_response() {
+  echo -e "$response"
 }
 
 main
