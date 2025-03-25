@@ -6,8 +6,7 @@ main() {
   set_fifos
   #debug
 
-  #nc -l 1234 <&$response_fd | server >&$response_fd
-  cat <&$request_fd | server >&$response_fd
+  nc -l 1234 <&$request_fd | server >&$response_fd
 
   eval "exec $fd>&-"
 }
