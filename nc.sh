@@ -28,11 +28,11 @@ server() {
     response_body= \
 
   while read line; do
-    process_line "$line"
+    process_request_fifo "$line"
   done
 }
 
-process_line() {
+process_request_fifo() {
   if [[ "$line" && "$line" != $'\r' ]]; then
     if [[ $line_number == 1 ]]; then
       get_request "$line" || exit 1
