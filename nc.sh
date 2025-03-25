@@ -4,14 +4,12 @@ source ~/p/bash-debugger
 
 main() {
   mkfifo /tmp/fifo_request 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
-  mkfifo /tmp/fifo_response 2>/dev/null
   exec {request_fd}<>/tmp/fifo_request
-  exec {response_fd}<>/tmp/fifo_response 
+  #debug
   #nc -l 1234 <&$request_fd | server >&$request_fd
   cat <&$request_fd | server
-  #debug
   #echo "BLOB" | server
-  eval "exec $fd>&-"
+  eval "exec $request_fd>&-"
 }
 
 server() {
@@ -21,8 +19,7 @@ server() {
     if [[ ! "$response" ]]; then
       get_request || exit 1 
       if [[ "$response" ]]; then
-        send_response >&$response_fd || exit 1
-        cat <&$response_fd | handle_response
+        handle_response || exit 1
         unset response
       else
         echo "Error: Response from request was not recognized"
@@ -60,10 +57,6 @@ get_request() {
     ((n++))
     echo "$line" >&2
   done
-}
-
-send_response() {
-  echo -e "$response"
 }
 
 handle_response() {
