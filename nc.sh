@@ -3,13 +3,12 @@
 source ~/p/bash-debugger
 
 main() {
-  set -x
   mkfifo /tmp/fifo_request 2>/dev/null #ignore "/tmp/fifo already exists" message if fifo already exists
   mkfifo /tmp/fifo_response 2>/dev/null
   exec {request_fd}<>/tmp/fifo_request
   exec {response_fd}<>/tmp/fifo_response 
   #nc -l 1234 <&$request_fd | server >&$request_fd
-  cat <&$request_fd | server >&$response_fd
+  cat <&$request_fd | server
   #debug
   #echo "BLOB" | server
   eval "exec $fd>&-"
@@ -17,6 +16,7 @@ main() {
 
 server() {
   local response=
+  #set -x
   while true; do
     if [[ ! "$response" ]]; then
       get_request || exit 1 
@@ -30,7 +30,7 @@ server() {
       fi
     fi
   done
-  set +x
+  #set +x
 }
 
 get_request() {
@@ -64,11 +64,26 @@ get_request() {
 
 send_response() {
   echo -e "$response"
-  echo -e "$response" >&2
 }
 
 handle_response() {
-  echo "response $response is currently being handled"
+  response_code="$(echo "$response" | awk '{ print $2 }')"
+  case "$response_code" in
+    200)
+      echo "200 OK"
+      final_message="$(echo -e "$response" | awk 'END { print }')"
+      echo "$final_message"
+      ;;
+    404)
+      echo "404 Not Found. Path was not recognized"
+      ;;
+    405)
+      echo "405 Method Not Allowed. Method was not recognized"
+      ;;
+    *)
+      echo "Response code not recognized"
+      ;;
+  esac
 }
 
 main
