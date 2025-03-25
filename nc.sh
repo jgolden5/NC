@@ -6,8 +6,8 @@ main() {
   set_fifos
   #debug
 
-  #nc -l 1234 <&$request_fd | server >&$response_fd
-  cat <&$request_fd | server >&$response_fd
+  nc -l 1234 <&$response_fd | server >&$response_fd
+  #cat <&$request_fd | server >&$response_fd
 
   eval "exec $fd>&-"
 }
@@ -41,7 +41,7 @@ process_request_fifo() {
     fi
     (( line_number++ ))
   else
-    echo -e "$response" >&$response_fd
+    echo -e "$response"
     line_number=1
   fi
 }
