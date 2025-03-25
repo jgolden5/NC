@@ -28,18 +28,22 @@ server() {
     response_body= \
 
   while read line; do
-    if [[ "$line" && "$line" != $'\r' ]]; then
-      if [[ $line_number == 1 ]]; then
-        get_request "$line" || exit 1
-        process_request
-        generate_response
-      fi
-      (( line_number++ ))
-    else
-      echo -e "$response" >&$response_fd
-      line_number=1
-    fi
+    process_line "$line"
   done
+}
+
+process_line() {
+  if [[ "$line" && "$line" != $'\r' ]]; then
+    if [[ $line_number == 1 ]]; then
+      get_request "$line" || exit 1
+      process_request
+      generate_response
+    fi
+    (( line_number++ ))
+  else
+    echo -e "$response" >&$response_fd
+    line_number=1
+  fi
 }
 
 get_request() {
