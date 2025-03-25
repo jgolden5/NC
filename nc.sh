@@ -33,9 +33,7 @@ server() {
 get_request() {
   n=1
   while read line; do
-    if [[ "$line" =~ "200 OK" || "$line" =~ "404 Not Found" || "$line" =~ "405 Method Not Allowed" ]]; then
-      continue
-    elif [[ $n == 1 ]]; then
+    if [[ $n == 1 ]]; then
       local method="$(echo "$line" | awk '{ print $1 }')"
       local path="$(echo "$line" | awk '{ print $2 }')"
       local version="$(echo "$line" | awk '{ print $3 }' | sed 's/\r//')"
