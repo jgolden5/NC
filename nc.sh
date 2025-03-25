@@ -16,10 +16,10 @@ main() {
 server() {
   local \
     line_number=1 \
-    request= \ 
+    request= \
     response= \
     response_code= \
-    response_message= \ 
+    response_message= \
 
   set -x
   while read line; do
