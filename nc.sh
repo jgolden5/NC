@@ -29,14 +29,18 @@ server() {
     response_body= \
 
   while read line; do
+    set -x
     if [[ "$line" ]]; then
       get_request "$line" || exit 1
       process_request
       generate_response
     else
-      send_response || exit 1
+      echo -e "$response" >&$response_fd
+      unset request
+      line_number=0
     fi
     (( line_number++ ))
+    set +x
   done
 }
 
@@ -48,8 +52,8 @@ get_request() {
 }
 
 process_request() {
-  local method="$(echo "$request" | awk '{ print $1 }')"
-  local path="$(echo "$request" | awk '{ print $2 }')"
+  method="$(echo "$request" | awk '{ print $1 }')"
+  path="$(echo "$request" | awk '{ print $2 }')"
 }
 
 generate_response() {
@@ -69,10 +73,6 @@ generate_response() {
     response_body="method was invalid"
   fi
   response="HTTP/1.0 $response_code $response_reason\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n$response_body"
-}
-
-send_response() {
-  echo -e "$response" >&$response_fd
 }
 
 main
