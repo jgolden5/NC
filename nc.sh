@@ -47,7 +47,7 @@ process_request_fifo() {
 }
 
 get_request() {
-  request+="$1"
+  request="$1"
   echo "$line" >&2
 }
 
