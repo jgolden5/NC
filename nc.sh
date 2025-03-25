@@ -6,8 +6,8 @@ main() {
   set_fifos
   #debug
 
-  nc -l 1234 <&$request_fd | server >&$response_fd
-  #cat <&$request_fd | server >&$response_fd
+  #nc -l 1234 <&$request_fd | server >&$response_fd
+  cat <&$request_fd | server >&$response_fd
 
   eval "exec $fd>&-"
 }
@@ -24,8 +24,7 @@ server() {
     line_number=1 \
     request= \
     response= \
-    response_code= \
-    response_reason= \
+    response_code_and_reason= \
     response_body= \
 
   while read line; do
@@ -56,20 +55,17 @@ process_request() {
 generate_response() {
   if [[ $method == "GET" ]]; then
     if [[ $path == "/" ]]; then
-      response_code=200
-      response_reason="OK"
+      response_code_and_reason="200 OK"
       response_body="Netcat Succeeded"
     else
-      response_code="404"
-      response_reason="Not Found"
+      response_code_and_reason="404 Not Found"
       response_body="path didn't exist"
     fi
   else
-    response_code=405
-    response_reason="Method Not Allowed"
+    response_code_and_reason="405 Method Not Allowed"
     response_body="method was invalid"
   fi
-  response="HTTP/1.0 $response_code $response_reason\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n$response_body"
+  response="HTTP/1.0 $response_code_and_reason\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n$response_body"
 }
 
 main
