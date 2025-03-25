@@ -6,8 +6,8 @@ main() {
   set_fifos
   #debug
 
-  #nc -l 1234 <&$request_fd | server >&$response_fd
-  cat <&$request_fd | server >&$response_fd
+  nc -l 1234 <&$request_fd | server >&$response_fd
+  #cat <&$request_fd | server >&$response_fd
 
   eval "exec $fd>&-"
 }
@@ -29,25 +29,22 @@ server() {
     response_body= \
 
   while read line; do
-    set -x
-    if [[ "$line" ]]; then
-      get_request "$line" || exit 1
-      process_request
-      generate_response
+    if [[ "$line" && "$line" != $'\r' ]]; then
+      if [[ $line_number == 1 ]]; then
+        get_request "$line" || exit 1
+        process_request
+        generate_response
+      fi
+      (( line_number++ ))
     else
       echo -e "$response" >&$response_fd
-      unset request
-      line_number=0
+      line_number=1
     fi
-    (( line_number++ ))
-    set +x
   done
 }
 
 get_request() {
-  if [[ $line_number == 1 ]]; then
-    request+="$1"
-  fi
+  request+="$1"
   echo "$line" >&2
 }
 
