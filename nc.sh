@@ -8,7 +8,7 @@ main() {
   mkfifo response 2>/dev/null
   exec {response_fd}<>response
   #debug
-  #nc -l 1234 <&$request_fd | server >&$request_fd
+  #nc -l 1234 <&$request_fd | server >&$response_fd
   cat <&$request_fd | server >&$response_fd
   eval "exec $fd>&-"
 }
@@ -19,14 +19,15 @@ server() {
     request= \
     response= \
     response_code= \
-    response_message= \
+    response_reason= \
+    response_body= \
 
   set -x
   while read line; do
     if [[ "$line" ]]; then
-      get_request "$line" || exit 1 
+      get_request "$line" || exit 1
       process_request
-      response="$response_code $response_message"
+      response="HTTP/1.0 $response_code $response_reason\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n$response_body"
     else
       send_response || exit 1
     fi
@@ -43,25 +44,27 @@ get_request() {
 }
 
 process_request() {
-  local method="$(echo "$line" | awk '{ print $1 }')"
-  local path="$(echo "$line" | awk '{ print $2 }')"
-  local version="$(echo "$line" | awk '{ print $3 }' | sed 's/\r//')"
-  version=${version:-"HTTP/1.0"}
-  local content_header="Content-Type: text/plain"
+  local method="$(echo "$request" | awk '{ print $1 }')"
+  local path="$(echo "$request" | awk '{ print $2 }')"
   if [[ $method == "GET" ]]; then
     if [[ $path == "/" ]]; then
       response_code=200
-      response_message="Netcat Succeeded"
+      response_reason="OK"
+      response_body="Netcat Succeeded"
     else
       response_code="404"
+      response_reason="Not Found"
+      response_body="path didn't exist"
     fi
   else
-    response="405 $response_message"
+    response_code=405
+    response_reason="Method Not Allowed"
+    response_body="method was invalid"
   fi
 }
 
 send_response() {
-  echo -e "$response"
+  echo -e "$response" >&$response_fd
 }
 
 main
