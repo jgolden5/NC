@@ -6,7 +6,8 @@ main() {
   mkfifo response 2>/dev/null
   exec {response_fd}<>response
   nc -kl 1234 <&$response_fd | server >&$response_fd
-  eval "exec $fd>&-"
+  eval "exec $response_fd>&-"
+  rm response
 }
 
 server() {
@@ -26,9 +27,10 @@ server() {
 }
 
 process_request_fifo() {
+  line="$@"
   if [[ "$line" && "$line" != $'\r' ]]; then
     if [[ $line_number == 1 ]]; then
-      get_request "$line" || exit 1
+      request="$line"
       process_request
       generate_response
     fi
@@ -43,10 +45,6 @@ process_request_fifo() {
     (( response_count++ ))
     set +x
   fi
-}
-
-get_request() {
-  request="$1"
 }
 
 process_request() {
