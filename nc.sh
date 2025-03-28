@@ -17,9 +17,7 @@ server() {
     response= \
     response_code_and_reason= \
     response_body= \
-    response_count=1 \
-    should_cat_file=f \
-    cat_file=f \
+    basic_response_count=1 \
 
   while read line; do
     process_request_fifo "$line"
@@ -39,7 +37,6 @@ process_request_fifo() {
     set -x
     echo -e "$response"
     line_number=1
-    (( response_count++ ))
     set +x
   fi
 }
@@ -51,7 +48,13 @@ process_request() {
 
 generate_response() {
   if [[ $method == "GET" ]]; then
-    if [[ $path == "/" || $path == /index.html ]]; then
+    if [[ "$path" == "/" ]]; then
+      response_code_and_reason="200 OK"
+      content_type='text/plain'
+      response_body="Netcat Succeeded #${basic_response_count}"
+      content_length="${#response_body}"
+      (( basic_response_count++ ))
+    elif [[ $path == /index.html ]]; then
       response_code_and_reason="200 OK"
       content_type='text/html'
       content_length="$(wc -c <index.html | awk '{ print $1 }')"
@@ -59,14 +62,14 @@ generate_response() {
     else
       response_code_and_reason="404 Not Found"
       content_type="text/plain"
-      content_length="${#response_body}"
       response_body="path didn't exist"
+      content_length="${#response_body}"
     fi
   else
     response_code_and_reason="405 Method Not Allowed"
     content_type="text/plain"
-    content_length="${#response_body}"
     response_body="method was invalid"
+    content_length="${#response_body}"
   fi
   response="HTTP/1.0 $response_code_and_reason\r\nContent-Type: $content_type\r\nContent-Length: $content_length\r\n\r\n$response_body"
 }
