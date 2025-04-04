@@ -57,8 +57,8 @@ generate_response() {
     elif [[ $path == /index.html ]]; then
       response_code_and_reason="200 OK"
       content_type='text/html'
-      content_length="$(wc -c <index.html | awk '{ print $1 }')"
-      response_body="$(cat index.html)"
+      content_length="$(wc -c < ~/web_data/index.html | awk '{ print $1 }')"
+      response_body="$(cat ~/web_data/index.html)"
     else
       response_code_and_reason="404 Not Found"
       content_type="text/plain"
