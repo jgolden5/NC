@@ -5,6 +5,7 @@ source ~/p/bash-debugger
 main() {
   mkfifo response 2>/dev/null
   exec {response_fd}<>response
+  #debug
   nc -kl 1234 <&$response_fd | server >&$response_fd
   eval "exec $response_fd>&-"
   rm response
@@ -20,12 +21,12 @@ server() {
     basic_response_count=1 \
 
   while read line; do
-    process_request_fifo "$line"
+    echo "line = $line" >&2
+    process_request_fifo
   done
 }
 
 process_request_fifo() {
-  line="$@"
   if [[ "$line" && "$line" != $'\r' ]]; then
     if [[ $line_number == 1 ]]; then
       request="$line"
@@ -36,6 +37,9 @@ process_request_fifo() {
   else
     set -x
     echo -e "$response"
+    if [[ "$binary_file" ]]; then
+      cat "$binary_file"
+    fi
     line_number=1
     set +x
   fi
@@ -54,11 +58,11 @@ generate_response() {
       response_body="Netcat Succeeded #${basic_response_count}"
       content_length="${#response_body}"
       (( basic_response_count++ ))
-    elif [[ $path == /index.html ]]; then
+    elif [[ $path == /image.jpg ]]; then
       response_code_and_reason="200 OK"
-      content_type='text/html'
-      content_length="$(wc -c < ~/web_data/index.html | awk '{ print $1 }')"
-      response_body="$(cat ~/web_data/index.html)"
+      content_type='image/jpeg'
+      content_length="$(wc -c < /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
+      binary_file="/Users/jgolden1/web_data/pictures_for_carolyn.jpg"
     else
       response_code_and_reason="404 Not Found"
       content_type="text/plain"

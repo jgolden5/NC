@@ -1,0 +1,6 @@
+gurrfamily.com: 
+  request - GET 
+  response - '200 OK\r\nDate: Fri, 04 Apr 2025 22:06:00 GMT\r\nServer: Apache\r\nLast-Modified: Sat, 09 Jun 2018 03:19:00 GMT\r\nETag: "ba28-56e2cfa45191a"\r\nAccept-Ranges: bytes\r\nContent-Length: 47656\r\nKeep-Alive: timeout=5, max=256\r\nConnection: Keep-Alive\r\nContent-Type: image/jpeg\r\n\r\n'
+nc: 
+  request - GET 
+  response - 200 OK
