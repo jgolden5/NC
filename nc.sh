@@ -36,7 +36,7 @@ process_request_fifo() {
     fi
     (( line_number++ ))
   else
-    echo -e "$response"
+    echo -ne "$response"
     if [[ "$binary_file" ]]; then
       cat "$binary_file"
       unset binary_file
@@ -59,7 +59,7 @@ generate_response() {
     elif [[ $path == /image.jpg ]]; then
       content_length="$(wc -c /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
       binary_file="/Users/jgolden1/web_data/pictures_for_carolyn.jpg"
-      response="HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: $content_length\r\n\r\n"
+      response="HTTP/1.1 200 OK\r\nDate: Fri, 04 Apr 2025 22:06:00 GMT\r\nServer: Apache\r\nLast-Modified: Sat, 09 Jun 2018 03:19:00 GMT\r\nAccept-Ranges: bytes\r\nContent-Length: 47656\r\nKeep-Alive: timeout=5, max=256\r\nConnection: Keep-Alive\r\nContent-Type: image/jpeg\r\n\r\n"
     else
       response_body="Path didn't exist"
       response="HTTP 1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
