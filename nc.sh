@@ -19,6 +19,7 @@ server() {
     response_code_and_reason= \
     response_body= \
     basic_response_count=1 \
+    binary_file= \
 
   while read line; do
     echo "line = $line" >&2
@@ -35,13 +36,12 @@ process_request_fifo() {
     fi
     (( line_number++ ))
   else
-    set -x
     echo -e "$response"
     if [[ "$binary_file" ]]; then
       cat "$binary_file"
+      unset binary_file
     fi
     line_number=1
-    set +x
   fi
 }
 
@@ -51,31 +51,23 @@ process_request() {
 }
 
 generate_response() {
-  if [[ $method == "GET" ]]; then
+  if [[ "$method" == "GET" ]]; then
     if [[ "$path" == "/" ]]; then
-      response_code_and_reason="200 OK"
-      content_type='text/plain'
       response_body="Netcat Succeeded #${basic_response_count}"
-      content_length="${#response_body}"
+      response="HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
       (( basic_response_count++ ))
     elif [[ $path == /image.jpg ]]; then
-      response_code_and_reason="200 OK"
-      content_type='image/jpeg'
       content_length="$(wc -c < /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
       binary_file="/Users/jgolden1/web_data/pictures_for_carolyn.jpg"
+      response="HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: $content_length\r\n\r\n"
     else
-      response_code_and_reason="404 Not Found"
-      content_type="text/plain"
-      response_body="path didn't exist"
-      content_length="${#response_body}"
+      response_body="Path didn't exist"
+      response="HTTP 1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
     fi
   else
-    response_code_and_reason="405 Method Not Allowed"
-    content_type="text/plain"
-    response_body="method was invalid"
-    content_length="${#response_body}"
+    response_body="Method was invalid"
+    response="HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
   fi
-  response="HTTP/1.0 $response_code_and_reason\r\nContent-Type: $content_type\r\nContent-Length: $content_length\r\n\r\n$response_body"
 }
 
 main
