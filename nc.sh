@@ -19,7 +19,7 @@ server() {
     response_code_and_reason= \
     response_body= \
     basic_response_count=1 \
-    binary_file= \
+    file= \
 
   while read line; do
     echo "line = $line" >&2
@@ -37,9 +37,9 @@ process_request_fifo() {
     (( line_number++ ))
   else
     echo -ne "$response"
-    if [[ -f "$binary_file" ]]; then
-      cat "$binary_file"
-      unset binary_file
+    if [[ -f "$file" ]]; then
+      cat "$file"
+      unset file
     fi
     line_number=1
   fi
@@ -56,11 +56,13 @@ generate_response() {
       response_body="Netcat Succeeded #${basic_response_count}"
       response="HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
       (( basic_response_count++ ))
-    elif [[ $path == /image.jpg ]]; then
-      content_length="$(wc -c /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
-      binary_file="/Users/jgolden1/web_data/pictures_for_carolyn.jpg"
-      content_length=$(wc -c /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')
-      response="HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: $content_length\r\n\r\n"
+    elif [[ $path == /index.html ]]; then
+      response_body="$(cat /Users/jgolden1/web_data/index.html)"
+      response="HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
+    elif [[ $path == /vim_image.png ]]; then
+      file="/Users/jgolden1/web_data/vim_image.png"
+      content_length="$(wc -c /Users/jgolden1/web_data/vim_image.png | awk '{ print $1 }')"
+      response="HTTP/1.1 200 OK\r\nContent-Type: image/png\r\nContent-Length: $content_length\r\n\r\n"
     else
       response_body="Path didn't exist"
       response="HTTP 1.1 404 Not Found\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
