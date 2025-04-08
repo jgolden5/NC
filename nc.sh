@@ -57,7 +57,7 @@ generate_response() {
       response="HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${#response_body}\r\n\r\n${response_body}"
       (( basic_response_count++ ))
     elif [[ $path == /image.jpg ]]; then
-      content_length="$(wc -c < /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
+      content_length="$(wc -c /Users/jgolden1/web_data/pictures_for_carolyn.jpg | awk '{ print $1 }')"
       binary_file="/Users/jgolden1/web_data/pictures_for_carolyn.jpg"
       response="HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: $content_length\r\n\r\n"
     else
